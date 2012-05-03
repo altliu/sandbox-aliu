@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -11,47 +12,13 @@ namespace AlohaParserTest
     class AlohaParser
     {
         private byte[] _headerBytes = new byte[] {0x01, 0x01, 0x02, 0x03, 0x04, 0x01, 0x00, 0x01};
-        private const string _time = "13:34:79";
-        private const string _employee = "Employee";
-        private const string _manager = "Manager";
-        private const string _description = "Description";
         private byte[] _messageBytes = new byte[] {};
 
-        public byte[] GetMessage()
+        public void ParseByMarshal(byte[] bytes)
         {
-            HeaderMessage headerMessage = new HeaderMessage();
-            headerMessage.blberProtocol = 0x01;
-            headerMessage.uTermId = 12345;
-            headerMessage.MsgType = 0x01;
-            headerMessage.uCRC = 678;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
 
-            SpyMessage spyMessage = new SpyMessage();
-            spyMessage.HeaderMsg = headerMessage;
-            spyMessage.szTime = _time;
-            spyMessage.nEmployeeId = 111222;
-            spyMessage.szEmployeeName = _employee;
-            spyMessage.nManagerId = 333444;
-            spyMessage.szManagerName = _manager;
-            spyMessage.nTableId = 555666;
-            spyMessage.nCheckId = 777888;
-            spyMessage.nTransactionType = 19;
-            spyMessage.szDescription = _description;
-            spyMessage.dAmount = 12.34;
-            spyMessage.nQuantity = 5;
-
-            int size = Marshal.SizeOf(spyMessage);
-            byte[] bytes = new byte[size];
-            IntPtr ptr = Marshal.AllocHGlobal(size);
-
-            Marshal.StructureToPtr(spyMessage, ptr, true);
-            Marshal.Copy(ptr, bytes, 0, size);
-            Marshal.FreeHGlobal(ptr);
-
-            return bytes;
-        }
-
-        public void ParseBytes1(byte[] bytes)
-        {
             SpyMessage spyMessage = new SpyMessage();
 
             int size = Marshal.SizeOf(spyMessage);
@@ -62,43 +29,73 @@ namespace AlohaParserTest
             spyMessage = (SpyMessage)Marshal.PtrToStructure(ptr, spyMessage.GetType());
             Marshal.FreeHGlobal(ptr);
 
+            sw.Stop();
+            Console.WriteLine("Elapse: " + sw.ElapsedMilliseconds);
+
             printMessage(spyMessage);  
         }
 
-        public void ParseBytes2(byte[] bytes)
+        public void ParseByRead(byte[] bytes)
         {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             using (MemoryStream ms = new MemoryStream(bytes))
             using (BinaryReader br = new BinaryReader(ms))
             {
-                Console.WriteLine("Protocol: " + br.ReadByte());
-                Console.WriteLine("Term ID: " + br.ReadUInt32());
-                Console.WriteLine("Message Type: " + br.ReadByte());
-                Console.WriteLine("UCRC: " + br.ReadUInt16());
+                HeaderMessage headerMessage = new HeaderMessage();
+                headerMessage.blberProtocol = br.ReadByte();
+                headerMessage.uTermId = br.ReadUInt32();
+                headerMessage.MsgType = br.ReadByte();
+                headerMessage.uCRC = br.ReadUInt16();
 
-                Console.WriteLine("Time: " + Encoding.ASCII.GetString(br.ReadBytes(9)));
-                Console.WriteLine("Employee ID: " + br.ReadUInt64());
-                Console.WriteLine("Employee: " + Encoding.ASCII.GetString(br.ReadBytes(40)));
-                Console.WriteLine("Manager ID: " + br.ReadInt64());
-                Console.WriteLine("Manager: " + Encoding.ASCII.GetString(br.ReadBytes(40)));
-                Console.WriteLine("Table ID: " + br.ReadUInt64());
-                Console.WriteLine("Check ID: " + br.ReadUInt64());
-                Console.WriteLine("Transaction Type: " + getType(br.ReadInt32()));
-                Console.WriteLine("Description: " + Encoding.ASCII.GetString(br.ReadBytes(40)));
+                SpyMessage spyMessage = new SpyMessage();
+                spyMessage.HeaderMsg = headerMessage;
+                spyMessage.szTime = Encoding.ASCII.GetString(br.ReadBytes(9));
+                spyMessage.nEmployeeId = br.ReadUInt64();
+                spyMessage.szEmployeeName = Encoding.ASCII.GetString(br.ReadBytes(40));
+                spyMessage.nManagerId = (ulong) br.ReadInt64();
+                spyMessage.szManagerName = Encoding.ASCII.GetString(br.ReadBytes(40));
+                spyMessage.nTableId = br.ReadUInt64();
+                spyMessage.nCheckId = br.ReadUInt64();
+                spyMessage.nTransactionType = br.ReadInt32();
+                spyMessage.szDescription = Encoding.ASCII.GetString(br.ReadBytes(40));
+                //byte[] amountBytes = br.ReadBytes(8);
+                //spyMessage.dAmount = BitConverter.ToDouble(amountBytes, 0);
+                spyMessage.dAmount = br.ReadDouble();
+                spyMessage.nQuantity = br.ReadInt16();
 
-                Console.WriteLine("ALL: " + BitConverter.ToString(bytes));
-                byte[] amountBytes = br.ReadBytes(8);
-                Console.WriteLine("HEX1: " + BitConverter.ToString(amountBytes));
+                Console.WriteLine("PARSE BY READ:");
+                //Console.WriteLine("Protocol: " + br.ReadByte());
+                //Console.WriteLine("Term ID: " + br.ReadUInt32());
+                //Console.WriteLine("Message Type: " + br.ReadByte());
+                //Console.WriteLine("UCRC: " + br.ReadUInt16());
+
+                //Console.WriteLine("Time: " + Encoding.ASCII.GetString(br.ReadBytes(9)));
+                //Console.WriteLine("Employee ID: " + br.ReadUInt64());
+                //Console.WriteLine("Employee: " + Encoding.ASCII.GetString(br.ReadBytes(40)));
+                //Console.WriteLine("Manager ID: " + br.ReadInt64());
+                //Console.WriteLine("Manager: " + Encoding.ASCII.GetString(br.ReadBytes(40)));
+                //Console.WriteLine("Table ID: " + br.ReadUInt64());
+                //Console.WriteLine("Check ID: " + br.ReadUInt64());
+                //Console.WriteLine("Transaction Type: " + getAlohaType(br.ReadInt32()));
+                //Console.WriteLine("Description: " + Encoding.ASCII.GetString(br.ReadBytes(40)));
+
+                //Console.WriteLine("ALL: " + BitConverter.ToString(bytes));
+                //byte[] amountBytes = br.ReadBytes(8);
+                //Console.WriteLine("HEX1: " + BitConverter.ToString(amountBytes));
                 //Array.Reverse(amountBytes);
                 //Console.WriteLine("HEX2: " + BitConverter.ToString(amountBytes));
-                Console.WriteLine("Amount: " + BitConverter.ToDouble(amountBytes, 0));
+                //Console.WriteLine("Amount: " + BitConverter.ToDouble(amountBytes, 0));
                 
-                Console.WriteLine("Quantity: " + br.ReadInt16());    
-                Console.WriteLine();
+                //Console.WriteLine("Quantity: " + br.ReadInt16());    
+                //Console.WriteLine();
+                printMessage(spyMessage);  
             }
-
+            sw.Stop();
+            Console.WriteLine("Elapse: " + sw.ElapsedMilliseconds);
         }
 
-        private string getType(int typeId)
+        private string getAlohaType(int typeId)
         {
             if (!Enum.IsDefined(typeof(TransactionTypes), typeId))
             {
@@ -125,7 +122,7 @@ namespace AlohaParserTest
             Console.WriteLine("Manager: " + spyMessage.szManagerName);
             Console.WriteLine("Table ID: " + spyMessage.nTableId);
             Console.WriteLine("Check ID: " + spyMessage.nCheckId);
-            Console.WriteLine("Transaction Type: " + getType(spyMessage.nTransactionType));
+            Console.WriteLine("Transaction Type: " + getAlohaType(spyMessage.nTransactionType));
             Console.WriteLine("Description: " + spyMessage.szDescription);
             Console.WriteLine("Amount: " + spyMessage.dAmount);
             Console.WriteLine("Quantity: " + spyMessage.nQuantity);

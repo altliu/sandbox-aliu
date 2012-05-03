@@ -1,4 +1,38 @@
-AlohaParserTest/_ReSharper.AlohaParserTest/*
-AlohaParserTest/AlohaParserTest.5.1.ReSharper.user
-AlohaParserTest/AlohaParserTest/bin/*
-AlohaParserTest/AlohaParserTest/obj/*
+# Files outside Git
+3rdparty/*
+HeatBin/*
+artifacts/*
+Docs
+
+# ReSharper files
+*ReSharper*
+*DotSettings
+
+# Visual Studio User Option file
+*.suo
+*.user
+
+# Build objects
+bin
+obj
+/artifacts
+/Build/ivysettings.xml
+/Build/common.xml
+
+
+# Binary files
+*.dll
+*.jar
+
+# Backup file from Settings Manager
+*.backup
+
+# Generated files
+**/generated/*
+ivy*SNAPSHOT*.xml
+
+# P4Merge backup file
+*.orig
+
+_UpgradeReport_Files
+UpgradeLog.xml

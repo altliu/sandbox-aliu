@@ -2,37 +2,72 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Mime;
 using System.Runtime.InteropServices;
 using System.Text;
+using TCP_Listener;
 
 namespace AlohaParserTest
 {
     class Program
     {
+        private static bool IsSerial = false;
+
+        private static AlohaMessageGenerator _messageGenerator = new AlohaMessageGenerator();
         private static AlohaParser _parser = new AlohaParser();
+
+        private static TCPListener _tcpListener;
+        private static SerialStream _serialStream;
+        private static FifoBuffer _buffer = new FifoBuffer();
+
 
         static void Main(string[] args)
         {
-            //ArraySegment<byte> arraySegment = new ArraySegment<byte>();
-            //arraySegment.
+            AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
+            //byte[] bytes = _messageGenerator.GetMessage();
+            //string byteString = BitConverter.ToString(bytes);
 
-            //LinkedList<ArraySegment<byte>> linkedList = new LinkedList<ArraySegment<byte>>();
-
-            byte[] bytes = _parser.GetMessage();
-            string test = Encoding.ASCII.GetString(bytes);
-            Console.WriteLine("Converted ({0}): {1}", test.Length, test);
-            _parser.ParseBytes1(bytes);
-            
-            _parser.ParseBytes2(bytes);
+            if (IsSerial)
+            {
+                _serialStream = new SerialStream("COM1", 2400);
+                _serialStream.Start();
+            }
+            else
+            {
+                _tcpListener = new TCPListener(7118, false, callBack);
+                _tcpListener.Start();
+            }
+            Console.WriteLine("Listening...");
 
             Console.ReadLine();
         }
 
-        private static void DoSomething()
+        static void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
-            using (MemoryStream ms = new MemoryStream())
-            {
+            _buffer.Close();
+            _tcpListener.Stop();
+        }
 
+        private static void callBack(byte[] bytes)
+        {
+            Logger.Log("Received " + bytes.Length + " bytes.");
+            Logger.Log(BitConverter.ToString(bytes));
+
+            _buffer.Write(bytes, 0, bytes.Length);
+
+            int length = 0;
+            while (length < _buffer.Length)
+            {
+                length = _buffer.PeekByte();
+                Logger.Log("Length is: " + length);
+                if (_buffer.Length >= length + 1)
+                {
+                    _buffer.ReadByte();
+                    byte[] data = new byte[length];
+                    _buffer.Read(data, 0, data.Length);
+                    _parser.ParseByMarshal(data);
+                    _parser.ParseByRead(data);
+                }
             }
         }
     }
