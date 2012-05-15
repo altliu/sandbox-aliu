@@ -173,6 +173,12 @@ namespace AlohaParserTest
             set { throw new NotImplementedException(); }
         }
 
+        protected override void Dispose(bool disposing)
+        {
+            _pendingSegments.Clear();
+            base.Dispose(disposing);
+        }
+
         #endregion
 
         #region Public Methods

@@ -24,8 +24,15 @@ namespace AlohaParserTest
         static void Main(string[] args)
         {
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
-            //byte[] bytes = _messageGenerator.GetMessage();
+            byte[] bytes = _messageGenerator.GetMessage();
             //string byteString = BitConverter.ToString(bytes);
+
+            _buffer.Write(bytes, 0, bytes.Length);
+            Console.WriteLine("Length: " + _buffer.Length);
+            byte[] dummy = new byte[3];
+            _buffer.Read(dummy, 0, 3);
+            Console.WriteLine("Length: " + _buffer.Length);
+
 
             if (IsSerial)
             {
