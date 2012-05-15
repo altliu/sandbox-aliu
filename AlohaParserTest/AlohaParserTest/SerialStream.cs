@@ -23,7 +23,12 @@ namespace AlohaParserTest
 
             _serialPort = new SerialPort(serialPort);
             _serialPort.BaudRate = baudRate;
-            //_serialPort.Parity = (Parity)Enum.Parse(typeof(Parity), TransactionManager.Instance.GetSettingValue("parity", (int)channelId));
+            _serialPort.Parity = Parity.None;
+            _serialPort.StopBits = StopBits.One;
+            _serialPort.DataBits = 8;
+            _serialPort.Handshake = Handshake.None;
+            //_serialPort.RtsEnable = true;
+            //_serialPort.DtrEnable = true;
             //_serialPort.DataBits = int.Parse(TransactionManager.Instance.GetSettingValue("dataBits", (int)channelId));
             //_serialPort.StopBits = (StopBits)Enum.Parse(typeof(StopBits), TransactionManager.Instance.GetSettingValue("stopBits", (int)channelId));
             //_serialPort.Handshake = (Handshake)Enum.Parse(typeof(Handshake), TransactionManager.Instance.GetSettingValue("handshake", (int)channelId));

@@ -173,12 +173,6 @@ namespace AlohaParserTest
             set { throw new NotImplementedException(); }
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            _pendingSegments.Clear();
-            base.Dispose(disposing);
-        }
-
         #endregion
 
         #region Public Methods
@@ -192,6 +186,17 @@ namespace AlohaParserTest
             {
                 return _pendingSegments.First.Value.Array[0];
             }
+        }
+
+        public int PeekInt()
+        {
+            if (Length < 4)
+                throw new TimeoutException("No data available");
+
+            lock (_readSyncRoot)
+            {
+                return BitConverter.ToInt32(_pendingSegments.First.Value.Array, _pendingSegments.First.Value.Offset);
+            }   
         }
 
         #endregion

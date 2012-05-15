@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Ports;
 using System.Linq;
 using System.Net.Mime;
 using System.Runtime.InteropServices;
@@ -24,20 +25,20 @@ namespace AlohaParserTest
         static void Main(string[] args)
         {
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
-            byte[] bytes = _messageGenerator.GetMessage();
+            //byte[] bytes = _messageGenerator.GetMessage();
             //string byteString = BitConverter.ToString(bytes);
 
-            _buffer.Write(bytes, 0, bytes.Length);
-            Console.WriteLine("Length: " + _buffer.Length);
-            byte[] dummy = new byte[3];
-            _buffer.Read(dummy, 0, 3);
-            Console.WriteLine("Length: " + _buffer.Length);
-
+            SpyMessage spyMessage = new SpyMessage();
+            Console.WriteLine("Size: " + Marshal.SizeOf(spyMessage));
 
             if (IsSerial)
             {
-                _serialStream = new SerialStream("COM1", 2400);
+                string[] ports = SerialPort.GetPortNames();
+
+                _serialStream = new SerialStream("COM16", 2400);
+                _serialStream.DataReceived += new Action<byte[]>(callBack);
                 _serialStream.Start();
+
             }
             else
             {
@@ -62,18 +63,29 @@ namespace AlohaParserTest
 
             _buffer.Write(bytes, 0, bytes.Length);
 
-            int length = 0;
+            int length = _buffer.PeekInt();
+            Logger.Log("Length is: " + length);
             while (length < _buffer.Length)
             {
-                length = _buffer.PeekByte();
-                Logger.Log("Length is: " + length);
-                if (_buffer.Length >= length + 1)
+                if (_buffer.Length >= length + 4)
                 {
-                    _buffer.ReadByte();
+                    byte[] lengthBytes = new byte[4];
+                    _buffer.Read(lengthBytes, 0, lengthBytes.Length);
+
                     byte[] data = new byte[length];
                     _buffer.Read(data, 0, data.Length);
                     _parser.ParseByMarshal(data);
                     _parser.ParseByRead(data);
+                }
+
+                if (_buffer.Length > 3)
+                {
+                    length = _buffer.PeekInt();
+                    Logger.Log("Length is: " + length);
+                }
+                else
+                {
+                    length = int.MaxValue;
                 }
             }
         }

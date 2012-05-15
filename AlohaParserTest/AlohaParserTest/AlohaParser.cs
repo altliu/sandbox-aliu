@@ -51,12 +51,12 @@ namespace AlohaParserTest
                 SpyMessage spyMessage = new SpyMessage();
                 spyMessage.HeaderMsg = headerMessage;
                 spyMessage.szTime = Encoding.ASCII.GetString(br.ReadBytes(9));
-                spyMessage.nEmployeeId = br.ReadUInt64();
+                spyMessage.nEmployeeId = br.ReadUInt32();
                 spyMessage.szEmployeeName = Encoding.ASCII.GetString(br.ReadBytes(40));
-                spyMessage.nManagerId = (ulong) br.ReadInt64();
+                spyMessage.nManagerId = br.ReadUInt32();
                 spyMessage.szManagerName = Encoding.ASCII.GetString(br.ReadBytes(40));
-                spyMessage.nTableId = br.ReadUInt64();
-                spyMessage.nCheckId = br.ReadUInt64();
+                spyMessage.nTableId = br.ReadUInt32();
+                spyMessage.nCheckId = br.ReadUInt32();
                 spyMessage.nTransactionType = br.ReadInt32();
                 spyMessage.szDescription = Encoding.ASCII.GetString(br.ReadBytes(40));
                 //byte[] amountBytes = br.ReadBytes(8);

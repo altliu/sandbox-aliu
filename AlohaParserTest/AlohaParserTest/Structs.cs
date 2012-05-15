@@ -23,20 +23,43 @@ namespace AlohaParserTest
         public HeaderMessage HeaderMsg;
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst=9)]
         public string szTime;                   // time in HH:MM:SS\0
-        public ulong nEmployeeId;               // Employee ID
+        public UInt32 nEmployeeId;               // Employee ID
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst=40)]
         public string szEmployeeName;           // Employee's Name
-        public ulong nManagerId;                // Manager ID
+        public UInt32 nManagerId;                // Manager ID
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst=40)]
-        public string szManagerName;            // Manager's Name
-        public ulong nTableId;                  // Table ID
-        public ulong nCheckId;                  // Check ID
+        public string szManagerName;            // Manager's Name5
+        public UInt32 nTableId;                  // Table ID
+        public UInt32 nCheckId;                  // Check ID
         public int nTransactionType;            // Transaction – see below
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst=40)]
         public string szDescription;            // Description of the Message
         public double dAmount;                  // Transaction Amount - dollar value
         public int nQuantity;                   // Quantity of the Transaction
     }
+
+    // NOTE: ORIGINAL
+    //// Length: 185
+    //[StructLayout(LayoutKind.Sequential, Pack = 1)]
+    //struct SpyMessage
+    //{
+    //    public HeaderMessage HeaderMsg;
+    //    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 9)]
+    //    public string szTime;                   // time in HH:MM:SS\0
+    //    public ulong nEmployeeId;               // Employee ID
+    //    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 40)]
+    //    public string szEmployeeName;           // Employee's Name
+    //    public ulong nManagerId;                // Manager ID
+    //    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 40)]
+    //    public string szManagerName;            // Manager's Name
+    //    public ulong nTableId;                  // Table ID
+    //    public ulong nCheckId;                  // Check ID
+    //    public int nTransactionType;            // Transaction – see below
+    //    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 40)]
+    //    public string szDescription;            // Description of the Message
+    //    public double dAmount;                  // Transaction Amount - dollar value
+    //    public int nQuantity;                   // Quantity of the Transaction
+    //}
 
     //Header Message
     //typedef struct
