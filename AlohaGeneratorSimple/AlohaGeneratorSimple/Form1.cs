@@ -38,7 +38,7 @@ namespace AlohaGeneratorSimple
 
                     using (NetworkStream ns = client.GetStream())
                     {
-                        uint terminal = (uint) _channelCb.SelectedItem;
+                        uint terminal = uint.Parse(_channelCb.Text);
                         uint check = uint.Parse(_checkTextbox.Text);
                         byte[] bytes = _message.GetMessage(type, check, terminal);
                         byte[] lengthBytes = BitConverter.GetBytes((uint) bytes.Length);
@@ -53,6 +53,26 @@ namespace AlohaGeneratorSimple
             }
         }
 
+        private void _breakStartButton_Click(object sender, EventArgs e)
+        {
+            write(AlohaTransactionType.Break_Start);
+        }
+
+        private void _breakEndButton_Click(object sender, EventArgs e)
+        {
+            write(AlohaTransactionType.Break_End);
+        }
+
+        private void _clockInButton_Click(object sender, EventArgs e)
+        {
+            write(AlohaTransactionType.Clock_In);
+        }
+
+        private void _clockOutButton_Click(object sender, EventArgs e)
+        {
+            write(AlohaTransactionType.Clock_Out);
+        }
+
         private void _addItemButton_Click(object sender, EventArgs e)
         {
             write(AlohaTransactionType.Add_Item);
@@ -63,9 +83,21 @@ namespace AlohaGeneratorSimple
             write(AlohaTransactionType.Close_Check);
         }
 
-        private void _breakStartButton_Click(object sender, EventArgs e)
+        private void _voidButton_Click(object sender, EventArgs e)
         {
-            write(AlohaTransactionType.Break_Start);
+            write(AlohaTransactionType.Void_Item);
         }
+
+        private void _taxButton_Click(object sender, EventArgs e)
+        {
+            write(AlohaTransactionType.Tax);
+        }
+
+        private void _totalButton_Click(object sender, EventArgs e)
+        {
+            write(AlohaTransactionType.Total);
+        }
+
+        
     }
 }

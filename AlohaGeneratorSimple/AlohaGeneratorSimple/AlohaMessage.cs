@@ -48,6 +48,11 @@ namespace AlohaGeneratorSimple
 
         public byte[] GetMessage(AlohaTransactionType type, uint check, uint terminal)
         {
+            return GetMessage(type, check, terminal, 0.00D);
+        }
+
+        public byte[] GetMessage(AlohaTransactionType type, uint check, uint terminal, double amount)
+        {
             HeaderMessage headerMessage = new HeaderMessage();
             headerMessage.blberProtocol = 0x01;
             headerMessage.uTermId = terminal;
@@ -65,7 +70,7 @@ namespace AlohaGeneratorSimple
             spyMessage.nCheckId = check;
             spyMessage.nTransactionType = (int) type;
             spyMessage.szDescription = _description;
-            spyMessage.dAmount = 12.34;
+            spyMessage.dAmount = amount;
             spyMessage.nQuantity = 5;
 
             int size = Marshal.SizeOf(spyMessage);
